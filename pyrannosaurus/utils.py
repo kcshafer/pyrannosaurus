@@ -1,5 +1,6 @@
 import base64
 from lxml import etree
+import os
 
 NS = "http://soap.sforce.com/2006/04/metadata"
 NS_FULL = "{http://soap.sforce.com/2006/04/metadata}"
@@ -27,3 +28,11 @@ def zip_to_fs(zip_response):
     zip_file = open('retrieve.zip', 'w')
     zip_file.write(decoded_file)
     zip_file.close()
+
+def zip_to_binary(file_path):
+    #TODO: make this absolute
+    zip_file = open(file_path)
+    zip_contents = zip_file.read()
+    encoded_file = base64.b64encode(zip_contents)
+    zip_file.close()
+    return encoded_file

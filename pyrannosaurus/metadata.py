@@ -5,7 +5,7 @@ import os.path
 from suds.client import Client
 from suds.cache import FileCache 
 
-from pyrannosaurus.utils import package_to_dict, zip_to_fs
+from pyrannosaurus.utils import package_to_dict, zip_to_fs, zip_to_binary
 
 class MetadataClient(object):
     _sessionHeader = None
@@ -85,15 +85,26 @@ class MetadataClient(object):
 
         return result
 
-    def deploy(self):
-        self._setHeaders('deploy')
-        obj = self._meta_client.factory.create('ListMetadataQuery')
-        obj.type = 'CustomObject'
-        args = []
-        args.append(obj)
-        result = self._meta_client.service.listMetadata(args, 20.0)
+    def deploy(self, file_path, **kwargs):
+        self._setHeaders('retrieve')
+        deploy_options = self._meta_client.factory.create('DeployOptions')
+        deploy_options.allowMissingFiles = False
+        deploy_options.autoUpdatePackage = False
+        deploy_options.checkOnly = False
+        deploy_options.ignoreWarnings = False
+        deploy_options.performRetrieve = False
+        deploy_options.purgeOnDelete = False
+        deploy_options.rollbackOnError = True
+        deploy_options.runAllTests = False
+        deploy_options.runTests = []
+        deploy_options.singlePackage = True
+        if kwargs:
+            for k, v in kwargs.iteritems():
+                    if k in deploy_options.__keylist__:
+                        deploy_options.__setattr__(k,v)
 
-        return result
+        res = self._meta_client.service.deploy(zip_to_binary(file_path), deploy_options)
+        return res
 
     def retrieve(self, package_manifest, api_version=29.0, api_access='Unrestricted', singlePackage=True):
         self._setHeaders('retrieve')
