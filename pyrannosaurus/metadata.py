@@ -131,3 +131,22 @@ class MetadataClient(object):
         zip_to_fs(zip_response)
 
         return True if zip_response else False 
+
+    def cancel_deploy(self, id):
+        self._setHeaders('cancelDeploy')
+        if id:
+            cancel_deploy_result = self._meta_client.service.cancelDeploy(id)
+            return cancel_deploy_result
+        else: 
+            #TODO: probably should impl this as exception
+            return 'Must specify id for cancel deploy call.'
+
+    def check_status(self, id):
+        self._setHeaders('checkStatus')
+        if id: 
+            async_result = self._meta_client.service.checkStatus(id)
+            return async_result
+        else:
+            #TODO: probably should impl this as exception
+            return 'Must specify id for check status call.'
+
