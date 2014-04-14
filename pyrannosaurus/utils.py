@@ -27,7 +27,7 @@ def package_to_dict(file_path):
 def binary_to_zip(zip_response):
     ''' Handle the SF Metadata API checkRetrieveStatus zip file response '''
 
-    decoded_file = base64.b64decode(zip_response.zipFile)
+    decoded_file = base64.b64decode(zip_response)
     zip_file = open('retrieve.zip', 'w')
     zip_file.write(decoded_file)
     zip_file.close()
