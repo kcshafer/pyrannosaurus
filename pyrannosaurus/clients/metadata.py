@@ -5,17 +5,14 @@ import os.path
 from suds.client import Client
 from suds.cache import FileCache
 
+from pyrannosaurus.clients.base import BaseClient
 from pyrannosaurus.utils import package_to_dict
 
-class MetadataClient(object):
-    _sessionHeader = None
-    _product = 'Metadata Tool'
-    _version = (0, 0, 0)
-    _location = None
-
-    _loginScopeHeader = None
+class MetadataClient(BaseClient):
 
     def __init__(self, wsdl, cacheDuration = 0, **kwargs):
+        super(MetadataClient, self).__init__()
+        #TODO: clean this up
         if '://' not in wsdl:
             if os.path.isfile(wsdl):
                 wsdl = 'file://' + os.path.abspath(wsdl)
@@ -31,59 +28,8 @@ class MetadataClient(object):
         headers = {'User-Agent': 'Salesforce/' + self._product + '/' + '.'.join(str(x) for x in self._version)}
         self._meta_client.set_options(headers = headers)
 
-        login_wsdl = 'wsdl/partner.xml'
-        if '://' not in login_wsdl:
-            if os.path.isfile(login_wsdl):
-                login_wsdl = 'file://' + os.path.abspath(login_wsdl)
-        self._login_client = Client(login_wsdl, cache = cache)
-
-    #TODO eval
-    def generateHeader(self, sObjectType):
-        try:
-          return self._meta_client.factory.create(sObjectType)
-        except:
-          print 'There is not a SOAP header of type %s' % sObjectType
-
-    #TODO eval
-    def _setEndpoint(self, location):
-        try:
-          self._meta_client.set_options(location = location)
-        except:
-          self._meta_client.wsdl.service.setlocation(location)
-
-        self._location = location
-
-    #TODO eval
-    def _setHeaders(self, call = None):
-        headers = {'SessionHeader': self._sessionHeader}
-
-        if call == 'login':
-            if self._loginScopeHeader is not None:
-                headers['LoginScopeHeader'] = self._loginScopeHeader
-            self._login_client.set_options(soapheaders = headers)
-
-        self._meta_client.set_options(soapheaders = headers)
-
-    #TODO: replace
-    def setLoginScopeHeader(self, header):
-        self._loginScopeHeader = header
-
-    #TODO: replace
-    def setSessionHeader(self, header):
-        self._sessionHeader = header
-
-    def login(self, username, password):
-        self._setHeaders('login')
-        result = self._login_client.service.login(username, password)
-
-        header = self.generateHeader('SessionHeader')
-        header.sessionId = result['sessionId']
-        self.setSessionHeader(header)
-        self._sessionId = result['sessionId']
-
-        self._setEndpoint(result['metadataServerUrl'])
-
-        return result
+    def login(self, username, password, token=''):
+        super(MetadataClient, self)._login(username, password, token)
 
     def deploy(self, file_path, **kwargs):
         self._setHeaders('retrieve')
