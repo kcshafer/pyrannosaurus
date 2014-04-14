@@ -27,6 +27,7 @@ def test_binary_to_zip():
     zipped.close()
     zipped = open('test.zip', 'r')
     zip_contents = zipped.read()
+    zip_contents+="==="
     encoded_file = base64.b64encode(zip_contents)
     zipped.close()
 
