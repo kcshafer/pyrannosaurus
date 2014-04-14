@@ -3,7 +3,7 @@ import sys
 import os.path
 
 from suds.client import Client
-from suds.cache import FileCache 
+from suds.cache import FileCache
 
 from pyrannosaurus.utils import package_to_dict, zip_to_fs, zip_to_binary
 
@@ -11,7 +11,7 @@ class MetadataClient(object):
     _sessionHeader = None
     _product = 'Metadata Tool'
     _version = (0, 0, 0)
-    _location = None 
+    _location = None
 
     _loginScopeHeader = None
 
@@ -37,13 +37,13 @@ class MetadataClient(object):
                 login_wsdl = 'file://' + os.path.abspath(login_wsdl)
         self._login_client = Client(login_wsdl, cache = cache)
 
-    #TODO eval 
+    #TODO eval
     def generateHeader(self, sObjectType):
         try:
           return self._meta_client.factory.create(sObjectType)
         except:
           print 'There is not a SOAP header of type %s' % sObjectType
-    
+
     #TODO eval
     def _setEndpoint(self, location):
         try:
@@ -53,7 +53,7 @@ class MetadataClient(object):
 
         self._location = location
 
-    #TODO eval 
+    #TODO eval
     def _setHeaders(self, call = None):
         headers = {'SessionHeader': self._sessionHeader}
 
@@ -128,25 +128,22 @@ class MetadataClient(object):
     def check_retrieve_status(self, id):
         self._setHeaders('checkRetrieveStatus')
         zip_response = self._meta_client.service.checkRetrieveStatus(id)
-        zip_to_fs(zip_response)
-
-        return True if zip_response else False 
+        return zip_response
 
     def cancel_deploy(self, id):
         self._setHeaders('cancelDeploy')
         if id:
             cancel_deploy_result = self._meta_client.service.cancelDeploy(id)
             return cancel_deploy_result
-        else: 
+        else:
             #TODO: probably should impl this as exception
             return 'Must specify id for cancel deploy call.'
 
     def check_status(self, id):
         self._setHeaders('checkStatus')
-        if id: 
+        if id:
             async_result = self._meta_client.service.checkStatus(id)
             return async_result
         else:
             #TODO: probably should impl this as exception
             return 'Must specify id for check status call.'
-
