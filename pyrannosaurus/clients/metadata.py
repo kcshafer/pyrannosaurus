@@ -5,7 +5,7 @@ import os.path
 from suds.client import Client
 from suds.cache import FileCache
 
-from pyrannosaurus.utils import package_to_dict, zip_to_fs, zip_to_binary
+from pyrannosaurus.utils import package_to_dict
 
 class MetadataClient(object):
     _sessionHeader = None

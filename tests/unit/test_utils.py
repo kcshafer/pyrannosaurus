@@ -34,3 +34,12 @@ def test_binary_to_zip():
     binary_to_zip(zip_contents)
 
     assert os.path.isfile('test.zip')
+
+def test_zip_to_binary_and_back():
+    package_file = open('tests/resources/zip_binary.txt')
+    zip_contents = package_file.read().replace("\n", "")
+    zip_contents = zip_contents.replace('"', '')
+    binary_to_zip(zip_contents)
+    return_binary = zip_to_binary('retrieve.zip')
+
+    assert zip_contents == return_binary
