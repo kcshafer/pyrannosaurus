@@ -37,7 +37,7 @@ class MetadataClient(BaseClient):
                 headers['LoginScopeHeader'] = self._loginScopeHeader
             self._base_client.set_options(soapheaders = headers)
 
-        #self._meta_client.set_options(soapheaders = headers)
+        self._meta_client.set_options(soapheaders = headers)
 
 
     def login(self, username, password, token=''):
