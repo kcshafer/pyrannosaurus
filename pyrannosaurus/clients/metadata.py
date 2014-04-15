@@ -10,7 +10,7 @@ from pyrannosaurus.utils import package_to_dict
 
 class MetadataClient(BaseClient):
 
-    def __init__(self, wsdl, cacheDuration = 0, **kwargs):
+    def __init__(self, wsdl='wsdl/metadata.xml', cacheDuration = 0, **kwargs):
         super(MetadataClient, self).__init__()
         #TODO: clean this up
         if '://' not in wsdl:
@@ -27,6 +27,18 @@ class MetadataClient(BaseClient):
 
         headers = {'User-Agent': 'Salesforce/' + self._product + '/' + '.'.join(str(x) for x in self._version)}
         self._meta_client.set_options(headers = headers)
+
+    #TODO eval
+    def _setHeaders(self, call = None):
+        headers = {'SessionHeader': self._sessionHeader}
+
+        if call == 'login':
+            if self._loginScopeHeader is not None:
+                headers['LoginScopeHeader'] = self._loginScopeHeader
+            self._base_client.set_options(soapheaders = headers)
+
+        #self._meta_client.set_options(soapheaders = headers)
+
 
     def login(self, username, password, token=''):
         super(MetadataClient, self)._login(username, password, token)
