@@ -18,6 +18,7 @@ class BaseClient(object):
 
     _loginScopeHeader = None
     _base_client = None
+    _client = None
 
     def __init__(self, wsdl='wsdl/partner.xml', cacheDuration = 0, **kwargs):
         print "super"
@@ -38,20 +39,14 @@ class BaseClient(object):
     def _login(self, username, password, token=''):
         self._setHeaders('login')
         result = self._base_client.service.login(username, password + token)
-
-        print 'result'
-        print result
-
         header = self.generateHeader('SessionHeader')
         header.sessionId = result['sessionId']
         self.setSessionHeader(header)
         self._sessionId = result['sessionId']
 
-        self._setEndpoint(result['metadataServerUrl'])
-
         return result
 
-    #TODO eval
+    #TODO : this really won't work, needs check for sobjecttype to go to right client
     def generateHeader(self, sObjectType):
         try:
           return self._base_client.factory.create(sObjectType)
@@ -61,9 +56,9 @@ class BaseClient(object):
     #TODO eval
     def _setEndpoint(self, location):
         try:
-          self._base_client.set_options(location = location)
+          self._client.set_options(location = location)
         except:
-          self._base_client.wsdl.service.setlocation(location)
+          self._client.wsdl.service.setlocation(location)
 
         self._location = location
 
@@ -75,8 +70,8 @@ class BaseClient(object):
             if self._loginScopeHeader is not None:
                 headers['LoginScopeHeader'] = self._loginScopeHeader
             self._base_client.set_options(soapheaders = headers)
-
-        #self._meta_client.set_options(soapheaders = headers)
+        else:
+            self._client.set_options(soapheaders = headers)
 
     #TODO: replace
     def setLoginScopeHeader(self, header):
