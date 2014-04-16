@@ -6,7 +6,7 @@ setup(
     description = "Salesforce Development Tools",
     author = "KC Shafer",
     author_email = "kclshafer@gmail.com",
-    url = "https://github.com/kcshafer/pyrannosauruspagoda/",
+    url = "https://github.com/kcshafer/pyrannosaurus/",
     keywords = ["salesforce"],
     install_requires = [
         "suds==0.4"
