@@ -33,7 +33,7 @@ class MetadataClient(BaseClient):
         self._setEndpoint(lr.metadataServerUrl)
 
         return lr
-        
+
     def deploy(self, file_path, **kwargs):
         self._setHeaders('retrieve')
         deploy_options = self._client.factory.create('DeployOptions')
