@@ -28,9 +28,7 @@ class BaseClient(object):
         else:
             cache = None
 
-        if '://' not in wsdl:
-            if os.path.isfile(wsdl):
-                wsdl = 'file://' + os.path.abspath(wsdl)
+        wsdl = 'file://' + os.path.abspath(wsdl)
         self._base_client =  Client(wsdl, cache = cache)
 
         headers = {'User-Agent': 'Salesforce/' + self._product + '/' + '.'.join(str(x) for x in self._version)}

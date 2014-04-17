@@ -13,16 +13,14 @@ class ApexClient(BaseClient):
     def __init__(self, wsdl='wsdl/apex.xml', cacheDuration=0, **kwargs):
         super(ApexClient, self).__init__()
         #TODO: clean this up
-        if '://' not in wsdl:
-            if os.path.isfile(wsdl):
-                wsdl = 'file://' + os.path.abspath(wsdl)
+        wsdl = 'file://' + os.path.abspath(wsdl)
+
 
         if cacheDuration > 0:
             cache = FileCache()
             cache.setduration(seconds = cacheDuration)
         else:
             cache = None
-        print wsdl
         self._client = Client(wsdl, cache = cache)
 
         headers = {'User-Agent': 'Salesforce/' + self._product + '/' + '.'.join(str(x) for x in self._version)}
