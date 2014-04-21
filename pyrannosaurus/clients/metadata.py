@@ -28,7 +28,7 @@ class MetadataClient(BaseClient):
         headers = {'User-Agent': 'Salesforce/' + self._product + '/' + '.'.join(str(x) for x in self._version)}
         self._client.set_options(headers = headers)
 
-    def login(self, username, password, token=''):
+    def login(self, username, password, token='', is_production=False):
         lr = super(MetadataClient, self)._login(username, password, token)
         self._setEndpoint(lr.metadataServerUrl)
 

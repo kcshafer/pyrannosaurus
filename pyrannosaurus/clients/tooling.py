@@ -27,9 +27,11 @@ class ToolingClient(BaseClient):
         headers = {'User-Agent': 'Salesforce/' + self._product + '/' + '.'.join(str(x) for x in self._version)}
         self._client.set_options(headers = headers)
 
-    def login(self, username, password, token=''):
+    def login(self, username, password, token='', is_production=False):
         lr = super(ToolingClient, self)._login(username, password, token)
-        self._setEndpoint("https://cs18.salesforce.com/services/Soap/T/29.0")
+        #replace the metadata 'm' with the Tooling 'T'
+        url = lr.metadataServerUrl.replace('/m/', '/T/')
+        self._setEndpoint(url)
 
         return lr
 

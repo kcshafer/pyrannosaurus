@@ -20,7 +20,8 @@ class ApexClient(BaseClient):
             cache = FileCache()
             cache.setduration(seconds = cacheDuration)
         else:
-            cache = None
+            cache = None   
+
         self._client = Client(wsdl, cache = cache)
 
         headers = {'User-Agent': 'Salesforce/' + self._product + '/' + '.'.join(str(x) for x in self._version)}
@@ -49,9 +50,11 @@ class ApexClient(BaseClient):
             debug_header.categories.append(self._default_log_info())  
         self._client.set_options(soapheaders = headers)
 
-    def login(self, username, password, token=''):
-        lr = super(ApexClient, self)._login(username, password, token)
-        self._setEndpoint("https://cs18.salesforce.com/services/Soap/s/29.0")
+    def login(self, username, password, token='', is_production=False):
+        lr = super(ApexClient, self)._login(username, password, token, is_production)
+        #replace the metadata 'm' with the apex 's'
+        url = lr.metadataServerUrl.replace('/m/', '/s/')
+        self._setEndpoint(url)
 
         return lr
 

@@ -34,8 +34,10 @@ class BaseClient(object):
         headers = {'User-Agent': 'Salesforce/' + self._product + '/' + '.'.join(str(x) for x in self._version)}
         self._base_client.set_options(headers = headers)
 
-    def _login(self, username, password, token=''):
+    def _login(self, username, password, token='', is_production=False):
         self._setHeaders('login')
+        target_url = 'https://login.salesforce.com/services/Soap/u/29.0' if is_production else 'https://test.salesforce.com/services/Soap/u/29.0'
+        self._base_client.set_options(location=target_url)
         result = self._base_client.service.login(username, password + token)
         header = self.generateHeader('SessionHeader')
         header.sessionId = result['sessionId']
