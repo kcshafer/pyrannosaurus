@@ -5,6 +5,7 @@ import os.path
 from suds.client import Client
 from suds.cache import FileCache
 
+from pyrannosaurus import get_package_dir
 from pyrannosaurus.clients.base import BaseClient
     
 class ApexClient(BaseClient):
@@ -13,8 +14,8 @@ class ApexClient(BaseClient):
     def __init__(self, wsdl='wsdl/apex.xml', cacheDuration=0, **kwargs):
         super(ApexClient, self).__init__()
         #TODO: clean this up
-        wsdl = 'file://' + os.path.abspath(wsdl)
-
+        wsdl = get_package_dir(wsdl)
+        wsdl = 'file:///' + os.path.abspath(wsdl)
 
         if cacheDuration > 0:
             cache = FileCache()

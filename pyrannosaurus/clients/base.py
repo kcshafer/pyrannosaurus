@@ -5,6 +5,8 @@ import os.path
 from suds.client import Client
 from suds.cache import FileCache
 
+from pyrannosaurus import get_package_dir
+
 class BaseClient(object):
     '''
         LoginClient uses suds to wrap the SF partner wsdl, but really only uses
@@ -28,7 +30,8 @@ class BaseClient(object):
         else:
             cache = None
 
-        wsdl = 'file://' + os.path.abspath(wsdl)
+        wsdl = get_package_dir(wsdl)
+        wsdl = 'file:///' + os.path.abspath(wsdl)
         self._base_client =  Client(wsdl, cache = cache)
 
         headers = {'User-Agent': 'Salesforce/' + self._product + '/' + '.'.join(str(x) for x in self._version)}

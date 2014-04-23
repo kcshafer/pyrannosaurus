@@ -5,6 +5,7 @@ import os.path
 from suds.client import Client
 from suds.cache import FileCache
 
+from pyrannosaurus import get_package_dir
 from pyrannosaurus.clients.base import BaseClient
     
 class ToolingClient(BaseClient):
@@ -12,9 +13,10 @@ class ToolingClient(BaseClient):
     def __init__(self, wsdl='wsdl/tooling.xml', cacheDuration=0, **kwargs):
         super(ToolingClient, self).__init__()
         #TODO: clean this up
-        if '://' not in wsdl:
+        wsdl = get_package_dir(wsdl)
+        if ':///' not in wsdl:
             if os.path.isfile(wsdl):
-                wsdl = 'file://' + os.path.abspath(wsdl)
+                wsdl = 'file:///' + os.path.abspath(wsdl)
 
         if cacheDuration > 0:
             cache = FileCache()
