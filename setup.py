@@ -1,8 +1,9 @@
 from setuptools import setup, find_packages
+import glob
 
 setup(
     name = "pyrannosaurus",
-    version = "0.0.1",
+    version = "0.0.6",
     description = "Salesforce Development Tools",
     author = "KC Shafer",
     author_email = "kclshafer@gmail.com",
@@ -11,7 +12,12 @@ setup(
     install_requires = [
         "suds==0.4"
     ],
-    packages = find_packages(),
+    package_dir={},
+    include_package_data=True,
+    packages=['pyrannosaurus', 'wsdl'],
+    package_data={
+       'wsdl' : ['wsdl/*.xml']
+    },
     long_description = """\
     Salesforce Development Tools
     ----------------------------
