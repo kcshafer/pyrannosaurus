@@ -56,19 +56,20 @@ def get_object(file_name='Account.object'):
 
     for node in primary_nodes:
         for child_node in x.xpath("sf:" + node, namespaces=NAMESPACES):
-            cm = Metadata(name=child_node.tag)
-            for pr in child_node.getchildren():
-                if not pr.getchildren():
-                    print "no children " + pr.tag.replace(NS_FULL, "")
-                    cm.add_property(pr.tag.replace(NS_FULL, ""), pr.text)
-                else:
-                    print "children " + pr.tag.replace(NS_FULL, "")
-                    name, sub_meta = get_child_node(pr)
-                    cm.add_child(pr.tag.replace(NS_FULL, ""), value=sub_meta)
+            if not child_node.getchildren():
+                meta.add_property(child_node.tag.replace(NS_FULL, ""), child_node.text)
+            else:
+                cm = Metadata(name=child_node.tag.replace(NS_FULL, ""))
+                for pr in child_node.getchildren():
+                    if not pr.getchildren():
+                        cm.add_property(pr.tag.replace(NS_FULL, ""), pr.text)
+                    else:
+                        name, sub_meta = get_child_node(pr)
+                        cm.add_child(pr.tag.replace(NS_FULL, ""), value=sub_meta)
 
-            (meta.__dict__[node]).append(cm)
+                (meta.__dict__[node]).append(cm)
 
-    return primary_nodes, meta
+    return meta
 
 def get_child_node(node):
     sub_meta = []
@@ -94,3 +95,5 @@ def get_child_node(node):
         sub_meta.append(sm)
 
     return name, sub_meta
+
+
