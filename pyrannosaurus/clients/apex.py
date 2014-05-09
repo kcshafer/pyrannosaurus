@@ -47,7 +47,6 @@ class ApexClient(BaseClient):
         print self._sessionHeader
         if(call == 'runTests'):
             debug_header = self.generateHeader('DebuggingHeader')
-            print debug_header
             debug_header.categories.append(self._default_log_info())  
         self._client.set_options(soapheaders = headers)
 
@@ -74,3 +73,6 @@ class ApexClient(BaseClient):
         run_tests_response = self._client.service.runTests(run_tests_request)
 
         return run_tests_response
+
+    def set_timeout(self, time):
+        self._client.set_options(timeout=time)

@@ -83,3 +83,13 @@ class BaseClient(object):
     #TODO: replace
     def setSessionHeader(self, header):
         self._sessionHeader = header
+
+    def set_timeout(self, time):
+        self._base_client.set_options(timeout=time)
+
+    def create_object(self, name):
+        try:
+            return self._client.factory.create(name)
+        except:
+            #TODO: should be real exception
+            return "Object not found"
