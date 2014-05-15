@@ -1,6 +1,7 @@
 import base64
 from lxml import etree
 import os
+import zipfile
 
 from pyrannosaurus.lib.metadata import Metadata
 
@@ -23,6 +24,18 @@ def package_to_dict(file_path):
             meta_types[meta_name].append(mem)
 
     return meta_types
+
+def zip(src):
+    zf = zipfile.ZipFile("deploy.zip" , "w")
+    abs_src = os.path.abspath(src)
+    for dirname, subdirs, files in os.walk(src):
+        for filename in files:
+            absname = os.path.abspath(os.path.join(dirname, filename))
+            arcname = absname[len(abs_src) + 1:]
+            print 'zipping %s as %s' % (os.path.join(dirname, filename),
+                                        arcname)
+            zf.write(absname, arcname)
+    zf.close()
 
 def binary_to_zip(zip_response):
     ''' Handle the SF Metadata API checkRetrieveStatus zip file response '''

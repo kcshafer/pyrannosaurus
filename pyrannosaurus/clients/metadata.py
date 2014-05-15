@@ -7,7 +7,7 @@ from suds.cache import FileCache
 
 from pyrannosaurus import get_package_dir
 from pyrannosaurus.clients.base import BaseClient
-from pyrannosaurus.utils import package_to_dict
+from pyrannosaurus.utils import package_to_dict, zip_to_binary
 
 class MetadataClient(BaseClient):
 
@@ -31,7 +31,7 @@ class MetadataClient(BaseClient):
         self._client.set_options(headers = headers)
 
     def login(self, username, password, token='', is_production=False):
-        lr = super(MetadataClient, self)._login(username, password, token)
+        lr = super(MetadataClient, self)._login(username, password, token, is_production)
         self._setEndpoint(lr.metadataServerUrl)
 
         return lr
@@ -57,6 +57,18 @@ class MetadataClient(BaseClient):
         res = self._client.service.deploy(zip_to_binary(file_path), deploy_options)
         return res
 
+    def check_deploy_status(self, id, include_details=False):
+        self._setHeaders('checkDeployStatus')
+        return self._client.service.checkDeployStatus(id,include_details)
+
+    def cancel_deploy(self, id):
+        self._setHeaders('cancelDeploy')
+        if id:
+            cancel_deploy_result = self._client.service.cancelDeploy(id)
+            return cancel_deploy_result
+        else:
+            #TODO: probably should impl this as exception
+            return 'Must specify id for cancel deploy call.'
     def retrieve(self, package_manifest, api_version=29.0, api_access='Unrestricted', singlePackage=True):
         self._setHeaders('retrieve')
         retrieve_request = self._client.factory.create('RetrieveRequest')
@@ -80,15 +92,6 @@ class MetadataClient(BaseClient):
         self._setHeaders('checkRetrieveStatus')
         zip_response = self._client.service.checkRetrieveStatus(id)
         return zip_response
-
-    def cancel_deploy(self, id):
-        self._setHeaders('cancelDeploy')
-        if id:
-            cancel_deploy_result = self._client.service.cancelDeploy(id)
-            return cancel_deploy_result
-        else:
-            #TODO: probably should impl this as exception
-            return 'Must specify id for cancel deploy call.'
 
     def check_status(self, id):
         self._setHeaders('checkStatus')
