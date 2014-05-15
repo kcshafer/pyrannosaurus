@@ -10,7 +10,8 @@ setup(
     url = "https://github.com/kcshafer/pyrannosaurus/",
     keywords = ["salesforce"],
     install_requires = [
-        "suds==0.4"
+        "suds==0.4",
+        "lxml=3.3.4",
     ],
     package_dir={},
     include_package_data=True,
