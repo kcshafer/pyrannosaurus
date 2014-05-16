@@ -42,12 +42,15 @@ class ApexClient(BaseClient):
         return log_info
 
     #TODO eval
-    def _setHeaders(self, call = None):
+    def _setHeaders(self, call=None):
         headers = {'SessionHeader': self._sessionHeader}
-        print self._sessionHeader
-        if(call == 'runTests'):
+        if call == 'runTests':
             debug_header = self.generateHeader('DebuggingHeader')
-            debug_header.categories.append(self._default_log_info())  
+            debug_header.categories.append(self._default_log_info())
+        if call == 'executeAnonymous':
+            debug_header = self.generateHeader('DebuggingHeader')
+            debug_header.categories.append(self._default_log_info())
+
         self._client.set_options(soapheaders = headers)
 
     def login(self, username, password, token='', is_production=False):
@@ -73,6 +76,12 @@ class ApexClient(BaseClient):
         run_tests_response = self._client.service.runTests(run_tests_request)
 
         return run_tests_response
+
+    def execute_anonymous(self, apex):
+        self._setHeaders('executeAnonymous')
+        execute_anonymous_response = self._client.service.executeAnonymous(apex)
+
+        return execute_anonymous_response
 
     def set_timeout(self, time):
         self._client.set_options(timeout=time)
