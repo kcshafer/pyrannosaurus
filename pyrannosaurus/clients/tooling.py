@@ -7,9 +7,9 @@ from suds.cache import FileCache
 
 from pyrannosaurus import get_package_dir
 from pyrannosaurus.clients.base import BaseClient
-    
+
 class ToolingClient(BaseClient):
-    
+    _valid_debug_levels = ['Debug']
     def __init__(self, wsdl='wsdl/tooling.xml', cacheDuration=0, **kwargs):
         super(ToolingClient, self).__init__()
         #TODO: clean this up
@@ -29,8 +29,12 @@ class ToolingClient(BaseClient):
         headers = {'User-Agent': 'Salesforce/' + self._product + '/' + '.'.join(str(x) for x in self._version)}
         self._client.set_options(headers = headers)
 
+    def _setHeaders(self, call = None):
+        headers = {'SessionHeader': self._sessionHeader}  
+        self._client.set_options(soapheaders = headers)
+
     def login(self, username, password, token='', is_production=False):
-        lr = super(ToolingClient, self)._login(username, password, token)
+        lr = super(ToolingClient, self)._login(username, password, token, is_production)
         #replace the metadata 'm' with the Tooling 'T'
         url = lr.metadataServerUrl.replace('/m/', '/T/')
         self._setEndpoint(url)
@@ -55,3 +59,9 @@ class ToolingClient(BaseClient):
         resp = self._client.service.query(query)
 
         return resp
+
+    def execute_anonymous(self, apex):
+        self._setHeaders('executeAnonymous')
+        execute_anonymous_response = self._client.service.executeAnonymous(apex)
+
+        return execute_anonymous_response
