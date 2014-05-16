@@ -21,8 +21,9 @@ class BaseClient(object):
     _loginScopeHeader = None
     _base_client = None
     _client = None
+    _base_calls = ['login', 'query_base']
 
-    def __init__(self, wsdl='wsdl/partner.xml', cacheDuration = 0, **kwargs):
+    def __init__(self, wsdl='wsdl/partner.xml', cacheDuration=0, **kwargs):
         print "super"
         if cacheDuration > 0:
             cache = FileCache()
@@ -37,9 +38,16 @@ class BaseClient(object):
         headers = {'User-Agent': 'Salesforce/' + self._product + '/' + '.'.join(str(x) for x in self._version)}
         self._base_client.set_options(headers = headers)
 
+    def login(self, username, password, token='', is_production=False):
+        lr = self._login(username, password, token, is_production)
+        self._setEndpoint(lr.serverUrl)
+
+        return lr 
+
     def _login(self, username, password, token='', is_production=False):
         self._setHeaders('login')
         target_url = 'https://login.salesforce.com/services/Soap/u/29.0' if is_production else 'https://test.salesforce.com/services/Soap/u/29.0'
+        print target_url
         self._base_client.set_options(location=target_url)
         result = self._base_client.service.login(username, password + token)
         header = self.generateHeader('SessionHeader')
@@ -57,25 +65,29 @@ class BaseClient(object):
           print 'There is not a SOAP header of type %s' % sObjectType
 
     #TODO eval
-    def _setEndpoint(self, location):
+    def _setEndpoint(self, location, base=False):
         try:
-          self._client.set_options(location = location)
+            if base:
+                self._base_client.set_options(location = location)
+            else:
+                self._client.set_options(location = location)
         except:
-          self._client.wsdl.service.setlocation(location)
+            if base:
+                self._base_client.wsdl.service.setlocation(location)
+            else:
+                self._client.wsdl.service.setlocation(location)
 
         self._location = location
 
     #TODO eval
-    def _setHeaders(self, call = None):
+    def _setHeaders(self, call=None):
         headers = {'SessionHeader': self._sessionHeader}
-
-        if call == 'login':
+        if call in _base_calls:
             if self._loginScopeHeader is not None:
                 headers['LoginScopeHeader'] = self._loginScopeHeader
             self._base_client.set_options(soapheaders = headers)
         else:
-            self._client.set_options(soapheaders = headers)
-
+            self.client 
     #TODO: replace
     def setLoginScopeHeader(self, header):
         self._loginScopeHeader = header
@@ -93,3 +105,8 @@ class BaseClient(object):
         except:
             #TODO: should be real exception
             return "Object not found"
+
+    def query(self, query):
+        self._setHeaders('query_base')
+        resp = self._base_client.service.query(query)
+        return resp
