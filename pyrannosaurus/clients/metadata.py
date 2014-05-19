@@ -30,6 +30,12 @@ class MetadataClient(BaseClient):
         headers = {'User-Agent': 'Salesforce/' + self._product + '/' + '.'.join(str(x) for x in self._version)}
         self._client.set_options(headers = headers)
 
+    def generateHeader(self, sObjectType):
+        try:
+          return self._client.factory.create(sObjectType)
+        except:
+          print 'There is not a SOAP header of type %s' % sObjectType
+          
     def login(self, username, password, token='', is_production=False):
         lr = super(MetadataClient, self)._login(username, password, token, is_production)
         self._setEndpoint(lr.metadataServerUrl)
@@ -52,7 +58,7 @@ class MetadataClient(BaseClient):
         if kwargs:
             for k, v in kwargs.iteritems():
                     if k in deploy_options.__keylist__:
-                        deploy_options.__setattr__(k,v)
+                        deploy_options.__setattr__(k, v)
 
         res = self._client.service.deploy(zip_to_binary(file_path), deploy_options)
         return res
@@ -69,6 +75,7 @@ class MetadataClient(BaseClient):
         else:
             #TODO: probably should impl this as exception
             return 'Must specify id for cancel deploy call.'
+
     def retrieve(self, package_manifest, api_version=29.0, api_access='Unrestricted', singlePackage=True):
         self._setHeaders('retrieve')
         retrieve_request = self._client.factory.create('RetrieveRequest')
