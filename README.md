@@ -9,3 +9,5 @@ Currently supports the Metadata, Tooling and Apex API. Also has a few useful uti
 4/9/14 - Published a very minimal, hopefully stable release, and published it on PyPi. This contains a good amount of functionality, though may contain issues. 
 
 4/15/14 - published 0.0.2 with a zip creation utility, and the check_deploy_status implmemented, to begin working with deployments.
+
+4/19/14 - published 0.0.3 with a schedule apex set of utilities, moving header support to base client, and execute anonymous support
