@@ -37,6 +37,38 @@ def zip(src):
             zf.write(absname, arcname)
     zf.close()
 
+def salesforce_datetime_format(dt):
+    return dt.strftime("%Y-%m-%dT%H:%m:%SZ")
+
+def set_debug_log(target_id, client=None, exp_dt=None,all_lvl=None, **kwargs):
+    _valid_debug_levels = ['Debug']
+    if client == None:
+        #handle here by creating new client
+        pass
+    tf = client.create_object('TraceFlag')
+    all_lvl = all_lvl if all_lvl else 'Debug'
+    if all_lvl not in _valid_debug_levels:
+        print "Provided debug level was not a valid option."
+    else:
+        tf.ApexCode = all_lvl
+        tf.ApexProfiling = all_lvl
+        tf.Callout = all_lvl
+        tf.Database = all_lvl
+        tf.Validation = all_lvl
+        tf.System = all_lvl
+        tf.Visualforce = all_lvl
+        tf.Workflow = all_lvl
+        if kwargs:
+            for k, v in kwargs.iteritems():
+                if k in tf.__keylist__:
+                    tf.__setattr__(k, v)
+
+        tf.TracedEntityId = target_id
+        tf.ExpirationDate = salesforce_datetime_format(exp_dt)
+        res = client.create(tf)
+
+        return res
+
 def binary_to_zip(zip_response):
     ''' Handle the SF Metadata API checkRetrieveStatus zip file response '''
 
@@ -110,3 +142,44 @@ def get_child_node(node):
     return name, sub_meta
 
 
+### useful set of functionality for unscheduling/rescheduling apex ###
+### depends on the schedule apex name = class name ###################
+
+class ScheduledJob:
+
+    def __init__(self, name, cron_exp, id):
+        self.name = name[0]
+        self.cron_exp = cron_exp
+        self.id = id
+
+def unschedule_apex(un, pw, token):
+    client = ApexClient()
+    client.login(un, pw, token, is_production=False)
+
+    cjds = client.query('SELECT Id,Name,JobType FROM CronJobDetail WHERE JobType = \'7\'')
+    cjd_ids = []
+    cjd_names = {}
+    for cjd in cjds.records:
+        cjd_ids.append(cjd.Id[0])
+        cjd_names[cjd.Id[0]] = cjd.Name
+
+    scheduled_jobs = []
+    cjd_ids_filter = '(\'' + '\', \''.join(cjd_ids) + '\')'
+    cts = client.query('SELECT CronExpression,CronJobDetailId,Id FROM CronTrigger WHERE CronJobDetailId IN %s' % cjd_ids_filter)
+    for ct in cts.records:
+        scheduled_jobs.append(ScheduledJob(cjd_names.get(ct.CronJobDetailId[0]), ct.CronExpression[0], ct.Id[0]))
+
+    apex_str = "system.abortjob('%s');"
+    #TODO: refactor to single api exec anon call
+    for sj in scheduled_jobs:
+        client.execute_anonymous(apex_str % sj.id)
+
+    return scheduled_jobs
+
+def reschedule_apex(un, pw, token, scheduled_jobs):
+    client = ApexClient()
+    client.login(un, pw, token, is_production=False)
+    apex_str = "%s x = new %s(); String cron_exp = '%s'; system.schedule('%s', cron_exp, x);"
+
+    for sj in scheduled_jobs:
+        resp = client.execute_anonymous(apex_str % (sj.name, sj.name, sj.cron_exp, sj.name))    
