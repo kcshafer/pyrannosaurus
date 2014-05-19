@@ -4,6 +4,7 @@ import os
 import zipfile
 
 from pyrannosaurus.lib.metadata import Metadata
+from pyrannosaurus.clients.apex import ApexClient 
 
 NS = "http://soap.sforce.com/2006/04/metadata"
 NS_FULL = "{http://soap.sforce.com/2006/04/metadata}"
