@@ -23,21 +23,24 @@ class ToolingClient(BaseClient):
             cache.setduration(seconds = cacheDuration)
         else:
             cache = None
-        print wsdl
         self._client = Client(wsdl, cache = cache)
 
         headers = {'User-Agent': 'Salesforce/' + self._product + '/' + '.'.join(str(x) for x in self._version)}
         self._client.set_options(headers = headers)
-
-    def _setHeaders(self, call = None):
-        headers = {'SessionHeader': self._sessionHeader}  
-        self._client.set_options(soapheaders = headers)
+        
+    def generateHeader(self, sObjectType):
+        try:
+          return self._client.factory.create(sObjectType)
+        except:
+          print 'There is not a SOAP header of type %s' % sObjectType
 
     def login(self, username, password, token='', is_production=False):
         lr = super(ToolingClient, self)._login(username, password, token, is_production)
         #replace the metadata 'm' with the Tooling 'T'
         url = lr.metadataServerUrl.replace('/m/', '/T/')
         self._setEndpoint(url)
+        super(ToolingClient, self)._setEndpoint(lr.serverUrl, base=True)
+        super(ToolingClient, self).setSessionHeader(self._sessionHeader)
 
         return lr
 
