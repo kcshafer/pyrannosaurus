@@ -28,37 +28,13 @@ class ApexClient(BaseClient):
         headers = {'User-Agent': 'Salesforce/' + self._product + '/' + '.'.join(str(x) for x in self._version)}
         self._client.set_options(headers = headers)
 
-    #TODO : this really won't work, needs check for sobjecttype to go to right client
-    def generateHeader(self, sObjectType):
-        try:
-          return self._client.factory.create(sObjectType)
-        except:
-          print 'There is not a SOAP header of type %s' % sObjectType
-    
-    def _default_log_info(self):
-        log_info = self._client.factory.create('LogInfo')
-        log_info.category = 'All'
-        log_info.level = 'Debug'
-        return log_info
-
-    #TODO eval
-    def _setHeaders(self, call=None):
-        headers = {'SessionHeader': self._sessionHeader}
-        if call == 'runTests':
-            debug_header = self.generateHeader('DebuggingHeader')
-            debug_header.categories.append(self._default_log_info())
-        if call == 'executeAnonymous':
-            debug_header = self.generateHeader('DebuggingHeader')
-            debug_header.categories.append(self._default_log_info())
-
-        self._client.set_options(soapheaders = headers)
-
     def login(self, username, password, token='', is_production=False):
         lr = super(ApexClient, self)._login(username, password, token, is_production)
         #replace the metadata 'm' with the apex 's'
         url = lr.metadataServerUrl.replace('/m/', '/s/')
         self._setEndpoint(url)
-
+        super(ApexClient, self)._setEndpoint(lr.serverUrl, base=True)
+        super(ApexClient, self).setSessionHeader(self._sessionHeader)
         return lr
 
     def run_tests(self, classes=None, namespace=None, all_tests=False):

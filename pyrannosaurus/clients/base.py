@@ -21,7 +21,6 @@ class BaseClient(object):
     _loginScopeHeader = None
     _base_client = None
     _client = None
-    _base_calls = ['login', 'query_base']
 
     def __init__(self, wsdl='wsdl/partner.xml', cacheDuration=0, **kwargs):
         print "super"
@@ -40,14 +39,13 @@ class BaseClient(object):
 
     def login(self, username, password, token='', is_production=False):
         lr = self._login(username, password, token, is_production)
-        self._setEndpoint(lr.serverUrl)
+        self._setEndpoint(lr.serverUrl, base=True)
 
         return lr 
 
     def _login(self, username, password, token='', is_production=False):
         self._setHeaders('login')
         target_url = 'https://login.salesforce.com/services/Soap/u/29.0' if is_production else 'https://test.salesforce.com/services/Soap/u/29.0'
-        print target_url
         self._base_client.set_options(location=target_url)
         result = self._base_client.service.login(username, password + token)
         header = self.generateHeader('SessionHeader')
@@ -68,9 +66,9 @@ class BaseClient(object):
     def _setEndpoint(self, location, base=False):
         try:
             if base:
-                self._base_client.set_options(location = location)
+                self._base_client.set_options(location=location)
             else:
-                self._client.set_options(location = location)
+                self._client.set_options(location=location)
         except:
             if base:
                 self._base_client.wsdl.service.setlocation(location)
@@ -79,15 +77,47 @@ class BaseClient(object):
 
         self._location = location
 
+    def _default_log_info(self):
+        log_info = self._client.factory.create('LogInfo')
+        log_info.category = 'All'
+        log_info.level = 'Debug'
+        return log_info
+
+    def _make_log_info(self, cat, lvl):
+        log_info = self._client.factory.create('LogInfo')
+        log_info.category = cat
+        log_info.level = lvl
+
+        return log_info
+
     #TODO eval
     def _setHeaders(self, call=None):
+        _base_calls = ['login', 'query_base']
         headers = {'SessionHeader': self._sessionHeader}
         if call in _base_calls:
             if self._loginScopeHeader is not None:
                 headers['LoginScopeHeader'] = self._loginScopeHeader
-            self._base_client.set_options(soapheaders = headers)
-        else:
-            self.client 
+        if call == 'runTests':
+            debug_header = self.generateHeader('DebuggingHeader')
+            debug_header.categories.append(self._default_log_info())
+        if call == 'executeAnonymous':
+            debug_header = self.generateHeader('DebuggingHeader')
+            debug_header.categories.append(self._make_log_info('Db', 'DEBUG'))
+            debug_header.categories.append(self._make_log_info('Workflow', 'DEBUG'))
+            debug_header.categories.append(self._make_log_info('Validation', 'DEBUG'))
+            debug_header.categories.append(self._make_log_info('Callout', 'DEBUG'))
+            debug_header.categories.append(self._make_log_info('Apex_code', 'DEBUG'))
+            debug_header.categories.append(self._make_log_info('Apex_profiling', 'DEBUG'))
+            debug_header.debugLevel = 'Debugonly'
+            headers['DebuggingHeader'] = debug_header
+        
+        self._base_client.set_options(soapheaders=headers)
+        try:
+            self._client.set_options(soapheaders=headers)
+        except:
+            pass
+            print "having issues"
+
     #TODO: replace
     def setLoginScopeHeader(self, header):
         self._loginScopeHeader = header
