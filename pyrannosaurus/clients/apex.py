@@ -28,6 +28,13 @@ class ApexClient(BaseClient):
         headers = {'User-Agent': 'Salesforce/' + self._product + '/' + '.'.join(str(x) for x in self._version)}
         self._client.set_options(headers = headers)
 
+    #TODO : this really won't work, needs check for sobjecttype to go to right client
+    def generateHeader(self, sObjectType):
+        try:
+          return self._client.factory.create(sObjectType)
+        except:
+          print 'There is not a SOAP header of type %s' % sObjectType
+
     def login(self, username, password, token='', is_production=False):
         lr = super(ApexClient, self)._login(username, password, token, is_production)
         #replace the metadata 'm' with the apex 's'
