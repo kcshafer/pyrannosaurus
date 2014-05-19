@@ -116,7 +116,6 @@ class BaseClient(object):
             self._client.set_options(soapheaders=headers)
         except:
             pass
-            print "having issues"
 
     #TODO: replace
     def setLoginScopeHeader(self, header):
