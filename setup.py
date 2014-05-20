@@ -3,7 +3,7 @@ import glob
 
 setup(
     name = "pyrannosaurus",
-    version = "0.0.3",
+    version = "0.0.4",
     description = "Salesforce Development Tools",
     author = "KC Shafer",
     author_email = "kclshafer@gmail.com",
@@ -15,7 +15,7 @@ setup(
         ],
     package_dir={},
     include_package_data=True,
-    packages=['pyrannosaurus', 'wsdl'],
+    packages=find_packages(),
     package_data={
        'wsdl' : ['wsdl/*.xml']
     },
