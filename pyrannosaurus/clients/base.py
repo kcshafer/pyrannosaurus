@@ -132,8 +132,13 @@ class BaseClient(object):
         try:
             return self._client.factory.create(name)
         except:
-            #TODO: should be real exception
-            return "Object not found"
+            try:
+                return self._base_client.factory.create(name)
+            except:
+                print "Object not found"
+
+    def create_generic_sobject(self):
+        return self.create_object('ens:sObject')
 
     def query(self, query):
         self._setHeaders('query_base')
