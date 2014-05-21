@@ -144,3 +144,8 @@ class BaseClient(object):
         self._setHeaders('query_base')
         resp = self._base_client.service.query(query)
         return resp
+
+    def create(self, record):
+        self._setHeaders('create')
+        resp = self._base_client.service.create(record)
+        return resp
