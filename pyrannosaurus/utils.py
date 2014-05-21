@@ -1,4 +1,5 @@
 import base64
+from datetime import datetime
 from lxml import etree
 import os
 import zipfile
@@ -40,6 +41,9 @@ def zip(src):
 
 def salesforce_datetime_format(dt):
     return dt.strftime("%Y-%m-%dT%H:%m:%SZ")
+
+def convert_soap_datetime(dt):
+    return datetime.strptime(dt, "%Y-%m-%d %H:%M:%S")
 
 def set_debug_log(target_id, client=None, exp_dt=None,all_lvl=None, **kwargs):
     _valid_debug_levels = ['Debug']
