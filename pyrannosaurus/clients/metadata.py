@@ -35,11 +35,12 @@ class MetadataClient(BaseClient):
           return self._client.factory.create(sObjectType)
         except:
           print 'There is not a SOAP header of type %s' % sObjectType
-          
+
     def login(self, username, password, token='', is_production=False):
         lr = super(MetadataClient, self)._login(username, password, token, is_production)
         self._setEndpoint(lr.metadataServerUrl)
-
+        super(MetadataClient, self)._setEndpoint(lr.serverUrl, base=True)
+        super(MetadataClient, self).setSessionHeader(self._sessionHeader)
         return lr
 
     def deploy(self, file_path, **kwargs):
