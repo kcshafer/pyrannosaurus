@@ -137,9 +137,11 @@ class BaseClient(object):
             except:
                 print "Object not found"
 
-    def create_generic_sobject(self):
-        return self.create_object('ens:sObject')
-
+    def create_generic_sobject(self, type=None):
+        so = self.create_object('ens:sObject')
+        so.type = type
+        return so
+ 
     def query(self, query):
         self._setHeaders('query_base')
         resp = self._base_client.service.query(query)

@@ -17,3 +17,17 @@ def test_login(monkeypatch):
     response = c._login('username', 'password')
     assert response, 'Login response was not created'
     assert response.sessionId == '123', 'Login response sessionId is incorrect'
+
+def test_create_generic_sobject_without_type():
+    c = BaseClient()
+    so = c.create_generic_sobject()
+
+    assert so, 'Generic sobject was not created'
+    assert so.type == None, 'Generic sobject was not returned with a None type'
+
+def test_create_generic_sobject_without_type():
+    c = BaseClient()
+    so = c.create_generic_sobject(type='Account')
+
+    assert so, 'Generic sobject was not created'
+    assert so.type == 'Account', 'Generic sobject was returned without a type'
