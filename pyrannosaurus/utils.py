@@ -11,6 +11,7 @@ NS = "http://soap.sforce.com/2006/04/metadata"
 NS_FULL = "{http://soap.sforce.com/2006/04/metadata}"
 NAMESPACES = {"sf": NS}
 METADATA_TYPE = {'object': 'CustomObject'}
+METADATA_DICTIONARY = {'objects' : 'Custom Object', 'triggers' : 'Apex Trigger', 'classes' : 'Apex Class'}
 
 def package_to_dict(file_path):
     parser = etree.XMLParser(remove_blank_text=True)
@@ -146,6 +147,8 @@ def get_child_node(node):
 
     return name, sub_meta
 
+def meta_dir_to_type(type):
+    return METADATA_DICTIONARY.get(type, None)
 
 def array_to_soql_string(arr):
     try:
