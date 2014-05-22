@@ -145,7 +145,12 @@ class BaseClient(object):
         resp = self._base_client.service.query(query)
         return resp
 
-    def create(self, record):
+    def create(self, records):
         self._setHeaders('create')
-        resp = self._base_client.service.create(record)
+        resp = self._base_client.service.create(records)
+        return resp
+
+    def upsert(self, records, external_id):
+        self._setHeaders('upsert')
+        resp = self._base_client.service.upsert(external_id, records)
         return resp
