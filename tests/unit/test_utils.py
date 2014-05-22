@@ -4,7 +4,7 @@ import zipfile
 
 import pytest
 
-from pyrannosaurus.utils import zip_to_binary, binary_to_zip
+from pyrannosaurus.utils import zip_to_binary, binary_to_zip, array_to_soql_string
 
 def test_zip_to_binary():
     test_file = open('test.txt', 'w')
@@ -43,3 +43,15 @@ def test_zip_to_binary_and_back():
     return_binary = zip_to_binary('retrieve.zip')
 
     assert zip_contents == return_binary
+
+def test_array_to_soql_string_str():
+    ''' Test converting a string array to a soql usable array of string '''
+    arr = ['1', '2', '3']
+    soql_arr = array_to_soql_string(arr)
+    assert soql_arr == "('1', '2', '3')"
+
+def test_array_to_soql_string_int():
+    ''' Test converting a string array to a soql usable array of ints'''
+    arr = [1, 2, 3]
+    soql_arr = array_to_soql_string(arr)
+    assert soql_arr == "(1, 2, 3)"
