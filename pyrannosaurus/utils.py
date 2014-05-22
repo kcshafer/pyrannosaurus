@@ -147,6 +147,22 @@ def get_child_node(node):
     return name, sub_meta
 
 
+def array_to_soql_string(arr):
+    try:
+        #get the 0 index as a sample
+        s = arr[0]
+        #check if the array is strings, then keep the quotes
+        if isinstance(s, str):
+            return '(\'' + '\', \''.join(arr) + '\')'
+        #otherwise create the string 'array' and remove the quotes
+        else:
+            soql_array = '(\'' + '\', \''.join(str(v) for v in arr) + '\')'
+            soql_array = soql_array.replace('\'', '')
+            return soql_array
+    except:
+        print "array to soql string recieved an empty array"
+        return arr
+
 ### useful set of functionality for unscheduling/rescheduling apex ###
 ### depends on the schedule apex name = class name ###################
 
@@ -169,7 +185,8 @@ def unschedule_apex(un, pw, token):
         cjd_names[cjd.Id[0]] = cjd.Name
 
     scheduled_jobs = []
-    cjd_ids_filter = '(\'' + '\', \''.join(cjd_ids) + '\')'
+    #TODO:make a array to string for soql utility
+    cjd_ids_filter = array_to_soql_string(cj_ids)
     cts = client.query('SELECT CronExpression,CronJobDetailId,Id FROM CronTrigger WHERE CronJobDetailId IN %s' % cjd_ids_filter)
     for ct in cts.records:
         scheduled_jobs.append(ScheduledJob(cjd_names.get(ct.CronJobDetailId[0]), ct.CronExpression[0], ct.Id[0]))
