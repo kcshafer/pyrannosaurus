@@ -3,7 +3,7 @@ import glob
 
 setup(
     name = "pyrannosaurus",
-    version = "0.0.4",
+    version = "0.0.5",
     description = "Salesforce Development Tools",
     author = "KC Shafer",
     author_email = "kclshafer@gmail.com",
