@@ -137,9 +137,12 @@ class BaseClient(object):
             except:
                 print "Object not found"
 
-    def create_generic_sobject(self, type=None):
+    def create_generic_sobject(self, type=None, **kwargs):
         so = self.create_object('ens:sObject')
         so.type = type
+        if kwargs:
+            for k,v in kwargs.iteritems():
+                so.__setattr__(k, v)
         return so
  
     def query(self, query):
