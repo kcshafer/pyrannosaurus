@@ -160,7 +160,6 @@ def array_to_soql_string(arr):
         #otherwise create the string 'array' and remove the quotes
         else:
             soql_array = '(\'' + '\', \''.join(str(v) for v in arr) + '\')'
-            soql_array = soql_array.replace('\'', '')
             return soql_array
     except:
         print "array to soql string recieved an empty array"
@@ -179,32 +178,40 @@ class ScheduledJob:
 def unschedule_apex(un, pw, token):
     client = ApexClient()
     client.login(un, pw, token, is_production=False)
-
-    cjds = client.query('SELECT Id,Name,JobType FROM CronJobDetail WHERE JobType = \'7\'')
-    cjd_ids = []
-    cjd_names = {}
-    for cjd in cjds.records:
-        cjd_ids.append(cjd.Id[0])
-        cjd_names[cjd.Id[0]] = cjd.Name
-
     scheduled_jobs = []
-    #TODO:make a array to string for soql utility
-    cjd_ids_filter = array_to_soql_string(cj_ids)
-    cts = client.query('SELECT CronExpression,CronJobDetailId,Id FROM CronTrigger WHERE CronJobDetailId IN %s' % cjd_ids_filter)
-    for ct in cts.records:
-        scheduled_jobs.append(ScheduledJob(cjd_names.get(ct.CronJobDetailId[0]), ct.CronExpression[0], ct.Id[0]))
+    
+    cjds = client.query('SELECT Id,Name,JobType FROM CronJobDetail WHERE JobType = \'7\'')
+    try:
+        cjd_ids = []
+        cjd_names = {}
+        for cjd in cjds.records:
+            cjd_ids.append(cjd.Id[0])
+            cjd_names[cjd.Id[0]] = cjd.Name
 
-    apex_str = "system.abortjob('%s');"
-    #TODO: refactor to single api exec anon call
-    for sj in scheduled_jobs:
-        client.execute_anonymous(apex_str % sj.id)
+        scheduled_jobs = []
+        #TODO:make a array to string for soql utility
+        cjd_ids_filter = array_to_soql_string(cjd_ids)
+        print cjd_ids_filter
+        cts = client.query("SELECT CronExpression,CronJobDetailId,Id FROM CronTrigger WHERE CronJobDetailId IN %s" % cjd_ids_filter)
+        for ct in cts.records:
+            scheduled_jobs.append(ScheduledJob(cjd_names.get(ct.CronJobDetailId[0]), ct.CronExpression[0], ct.Id[0]))
 
-    return scheduled_jobs
+        apex_str = "system.abortjob('%s'); \n"
+        exec_str = ''
+        #TODO: refactor to single api exec anon call
+        for sj in scheduled_jobs:
+            exec_str = exec_str + apex_str  % sj.id
+
+        client.execute_anonymous(exec_str)
+    finally:
+        return scheduled_jobs
 
 def reschedule_apex(un, pw, token, scheduled_jobs):
     client = ApexClient()
     client.login(un, pw, token, is_production=False)
-    apex_str = "%s x = new %s(); String cron_exp = '%s'; system.schedule('%s', cron_exp, x);"
-
+    apex_str = "%s x = new %s(); String cron_exp = '%s'; system.schedule('%s', cron_exp, x); \n"
+    exec_str = ''
     for sj in scheduled_jobs:
-        resp = client.execute_anonymous(apex_str % (sj.name, sj.name, sj.cron_exp, sj.name))    
+        exec_str = exec_str + apex_str % (sj.name, sj.name, sj.cron_exp, sj.name)
+
+    resp = client.execute_anonymous(exec_str)
