@@ -47,13 +47,13 @@ def test_array_to_soql_string_str():
     ''' Test converting a string array to a soql usable array of string '''
     arr = ['1', '2', '3']
     soql_arr = utils.array_to_soql_string(arr)
-    assert soql_arr == "('1', '2', '3')"
+    assert soql_arr == "('1', '2', '3')", "Soql array should be ('1', '2', '3') but is %s" % soql_arr
 
 def test_array_to_soql_string_int():
     ''' Test converting a string array to a soql usable array of ints'''
     arr = [1, 2, 3]
     soql_arr = utils.array_to_soql_string(arr)
-    assert soql_arr == "(1, 2, 3)"
+    assert soql_arr == "(1, 2, 3)", "Soql array should be (1, 2, 3) but is %s" % soql_arr
 
 def test_meta_dir_to_type_find():
     type = utils.meta_dir_to_type('classes')

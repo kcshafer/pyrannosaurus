@@ -159,7 +159,8 @@ def array_to_soql_string(arr):
             return '(\'' + '\', \''.join(arr) + '\')'
         #otherwise create the string 'array' and remove the quotes
         else:
-            soql_array = '(\'' + '\', \''.join(str(v) for v in arr) + '\')'
+            print "string"
+            soql_array = '(' + ', '.join(str(v) for v in arr) + ')'
             return soql_array
     except:
         print "array to soql string recieved an empty array"
