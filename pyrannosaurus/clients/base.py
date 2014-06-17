@@ -26,12 +26,15 @@ class BaseClient(object):
 
     class Connection(object):
 
-        def __init__(self, header, url):
+        def __init__(self, header, url, metadata_url):
             self.session_header = header
             self.instance_url = url
+            self.metadata_url = metadata_url
+            self.apex_url = metadata_url.replace('/m/', '/s/')
+            self.tooling_url = lr.metadataServerUrl.replace('/m/', '/T/')
+            
 
     def __init__(self, wsdl='wsdl/partner.xml', cacheDuration=0, **kwargs):
-        print "super"
         if cacheDuration > 0:
             cache = FileCache()
             cache.setduration(seconds = cacheDuration)
@@ -49,7 +52,7 @@ class BaseClient(object):
         lr, header = self._login(username, password, token, is_production, name=name)
         if name == 'default':
             self._setEndpoint(lr.serverUrl, base=True)
-        self._connections[name] = self.Connection(header, lr.serverUrl)
+        self._connections[name] = self.Connection(header, lr.serverUrl, lr.metadataServerUrl)
 
         return lr 
 

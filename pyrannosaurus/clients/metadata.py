@@ -36,12 +36,24 @@ class MetadataClient(BaseClient):
         except:
           print 'There is not a SOAP header of type %s' % sObjectType
 
-    def login(self, username, password, token='', is_production=False):
-        lr = super(MetadataClient, self)._login(username, password, token, is_production)
-        self._setEndpoint(lr.metadataServerUrl)
-        super(MetadataClient, self)._setEndpoint(lr.serverUrl, base=True)
-        super(MetadataClient, self).setSessionHeader(self._sessionHeader)
-        return lr
+    def login(self, username, password, token='', is_production=False, name='default'):
+        lr, header = super(MetadataClient, self)._login(username, password, token, is_production)
+        #replace the metadata 'm' with the apex 's'
+        self._connections[name] = self.Connection(header, lr.serverUrl, lr.metadataServerUrl)
+        if name == 'default':
+            self._setEndpoint(lr.metadataServerUrl)
+            super(MetadataClient, self)._setEndpoint(lr.serverUrl, base=True)
+            super(MetadataClient, self).setSessionHeader(self._sessionHeader)
+
+    def set_active_connection(self, name):
+        conn = self._connections.get(name)
+        if conn:
+            self.setSessionHeader(conn.session_header)
+            self._setEndpoint(conn.metadata_url, base=False)
+            super(MetadataClient, self).set_active_connection(name)
+        else:
+            #TODO:replace this with real exception
+            print "Connection not found"
 
     def deploy(self, file_path, **kwargs):
         self._setHeaders('retrieve')
