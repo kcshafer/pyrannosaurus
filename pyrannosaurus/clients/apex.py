@@ -36,7 +36,7 @@ class ApexClient(BaseClient):
           print 'There is not a SOAP header of type %s' % sObjectType
 
     def login(self, username, password, token='', is_production=False, name='default'):
-        lr, header = super(ApexClient, self)._login(username, password, token, is_production)
+        lr, header = super(ApexClient, self)._login(username, password, token, is_production, name=name)
         #replace the metadata 'm' with the apex 's'
         url = lr.metadataServerUrl.replace('/m/', '/s/')
         self._connections[name] = self.Connection(header, lr.serverUrl, lr.metadataServerUrl)

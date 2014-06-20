@@ -31,7 +31,7 @@ class BaseClient(object):
             self.instance_url = url
             self.metadata_url = metadata_url
             self.apex_url = metadata_url.replace('/m/', '/s/')
-            self.tooling_url = lr.metadataServerUrl.replace('/m/', '/T/')
+            self.tooling_url = metadata_url.replace('/m/', '/T/')
             
 
     def __init__(self, wsdl='wsdl/partner.xml', cacheDuration=0, **kwargs):
