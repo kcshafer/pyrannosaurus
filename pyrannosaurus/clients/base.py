@@ -22,8 +22,19 @@ class BaseClient(object):
     _base_client = None
     _client = None
 
+    _connections = {}
+
+    class Connection(object):
+
+        def __init__(self, header, url, metadata_url):
+            self.session_header = header
+            self.instance_url = url
+            self.metadata_url = metadata_url
+            self.apex_url = metadata_url.replace('/m/', '/s/')
+            self.tooling_url = metadata_url.replace('/m/', '/T/')
+            
+
     def __init__(self, wsdl='wsdl/partner.xml', cacheDuration=0, **kwargs):
-        print "super"
         if cacheDuration > 0:
             cache = FileCache()
             cache.setduration(seconds = cacheDuration)
@@ -37,23 +48,34 @@ class BaseClient(object):
         headers = {'User-Agent': 'Salesforce/' + self._product + '/' + '.'.join(str(x) for x in self._version)}
         self._base_client.set_options(headers = headers)
 
-    def login(self, username, password, token='', is_production=False):
-        lr = self._login(username, password, token, is_production)
-        self._setEndpoint(lr.serverUrl, base=True)
+    def login(self, username, password, token='', is_production=False, name='default'):
+        lr, header = self._login(username, password, token, is_production, name=name)
+        if name == 'default':
+            self._setEndpoint(lr.serverUrl, base=True)
+        self._connections[name] = self.Connection(header, lr.serverUrl, lr.metadataServerUrl)
 
         return lr 
 
-    def _login(self, username, password, token='', is_production=False):
+    def _login(self, username, password, token='', is_production=False, name='default'):
         self._setHeaders('login')
         target_url = 'https://login.salesforce.com/services/Soap/u/29.0' if is_production else 'https://test.salesforce.com/services/Soap/u/29.0'
         self._base_client.set_options(location=target_url)
         result = self._base_client.service.login(username, password + token)
         header = self.generateHeader('SessionHeader')
         header.sessionId = result['sessionId']
-        self.setSessionHeader(header)
-        self._sessionId = result['sessionId']
+        if name == 'default':
+            self.setSessionHeader(header)
 
-        return result
+        return result, header
+
+    def set_active_connection(self, name):
+        conn = self._connections.get(name)
+        if conn:
+            self.setSessionHeader(conn.session_header)
+            self._setEndpoint(conn.instance_url, base=True)
+        else:
+            #TODO:replace this with real exception
+            print "Connection not found"
 
     #TODO : this really won't work, needs check for sobjecttype to go to right client
     def generateHeader(self, sObjectType):
@@ -137,9 +159,12 @@ class BaseClient(object):
             except:
                 print "Object not found"
 
-    def create_generic_sobject(self, type=None):
+    def create_generic_sobject(self, type=None, **kwargs):
         so = self.create_object('ens:sObject')
         so.type = type
+        if kwargs:
+            for k,v in kwargs.iteritems():
+                so.__setattr__(k, v)
         return so
  
     def query(self, query):

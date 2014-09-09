@@ -34,15 +34,26 @@ class ToolingClient(BaseClient):
         except:
           print 'There is not a SOAP header of type %s' % sObjectType
 
-    def login(self, username, password, token='', is_production=False):
-        lr = super(ToolingClient, self)._login(username, password, token, is_production)
-        #replace the metadata 'm' with the Tooling 'T'
+    def login(self, username, password, token='', is_production=False, name='default'):
+        lr, header = super(ApexClient, self)._login(username, password, token, is_production)
+        #replace the metadata 'm' with the apex 's'
         url = lr.metadataServerUrl.replace('/m/', '/T/')
-        self._setEndpoint(url)
-        super(ToolingClient, self)._setEndpoint(lr.serverUrl, base=True)
-        super(ToolingClient, self).setSessionHeader(self._sessionHeader)
-
+        self._connections[name] = self.Connection(header, lr.serverUrl, lr.metadataServerUrl)
+        if name == 'default':
+            self._setEndpoint(url)
+            super(ToolingClient, self)._setEndpoint(lr.serverUrl, base=True)
+            super(ToolingClient, self).setSessionHeader(self._sessionHeader)
         return lr
+
+    def set_active_connection(self, name):
+        conn = self._connections.get(name)
+        if conn:
+            self.setSessionHeader(conn.session_header)
+            self._setEndpoint(conn.tooling_url, base=False)
+            super(ToolingClient, self).set_active_connection(name)
+        else:
+            #TODO:replace this with real exception
+            print "Connection not found"
 
     def get_soap_object(self, obj_name):
         try:
